@@ -18,11 +18,11 @@ class Record(object):
         self.RATE = 44100
 
     def write_pid_file(self):
-        pid = "\n"+str(os.getpid())
+        pid = "\n" + str(os.getpid())
         f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
         f.write(pid)
         f.close()
-    
+
     def is_silent(self, snd_data):
         "Returns 'True' if below the 'silent' threshold"
         return max(snd_data) < self.THRESHOLD
@@ -92,7 +92,7 @@ class Record(object):
         print("\n\n\n                             SOUND LEVEL")
 
         while True:
-            
+
             nb += 1
             data_array = np.zeros((300))
             # little endian, signed short
@@ -103,7 +103,7 @@ class Record(object):
             r.extend(snd_data)
 
             silent = self.is_silent(snd_data)
-            
+
             print("|" * int(max(snd_data) / 33))
 
             np.append(snd_data, data_array)
@@ -144,17 +144,12 @@ class Record(object):
         wf.close()
 
     def launch(self):
-        self.write_pid_file() 
+        self.write_pid_file()
         self.record_to_file('sentence.wav')
         os.system("sox sentence.wav -r 16000 sentence.flac")
-        print(
-            "                           ----------------------------------------------------- \
-                                                                           \
-                                                                           \
-                                                                           \
-                                        [+] DONE - result written to sentence.flac [+]     \
-                                                                           \
-                                                                           \
-                                                                          \
-                                        ----------------------------------------------------- \
-            ")
+        print("                           ----------------------------------------------------- ")
+                                                                      
+        print("                              [+] DONE - result written to sentence.flac [+]     ")
+                                                                        
+        print("                           ----------------------------------------------------- ")
+            

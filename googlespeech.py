@@ -1,4 +1,4 @@
-import httplib
+import http.client
 import sys
 import re
 import os
@@ -9,10 +9,9 @@ class SpeechRecog(object):
     @staticmethod
     def get_answer_from_google():
 
-        f = open("/home/random/Python-exp/VoiceCommander/sentence.flac", "r")
-        data = f.read()
-        f.close()
-        google_speech = httplib.HTTPConnection('www.google.com')
+        data = open(
+                "/home/random/Python-exp/VoiceCommander/sentence.flac", "rb").read()
+        google_speech = http.client.HTTPConnection('www.google.com')
 
         google_speech.request('POST',
                               '/speech-api/v2/recognize?output=json&lang=fr&key=AIzaSyC1xLBh8Wsh_DYUU3K3NI9Q2PKX2E4MqLw',
@@ -20,8 +19,8 @@ class SpeechRecog(object):
 
         answer = google_speech.getresponse().read()
         google_speech.close()
-        f = open("text", "w").write(answer)
-
+        
+        return answer
 
 if __name__ == '__main__':
 

@@ -1,6 +1,6 @@
 from os import system, path, walk, popen, getpid
 from notify import notify
-from multiprocessing import Pool
+from googlespeech import SpeechRecog
 from subprocess import call, Popen
 from recorder import Record
 from gtts import gTTS
@@ -26,15 +26,13 @@ class Recognizer(object):
         self.directory = "/run/media/random/DATA/Animes/"
         self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
    #--------------------------------------------------------------#
-    @staticmethod
-    def record_and_read():
+    
+    def record_and_read(self):
 
         r = Record()
         r.launch()
-        system(
-            "cd /home/random/Python-exp/VoiceCommander && python2 googlespeech.py")
-        speech = str(open("text", "r").read())
-
+        speech = SpeechRecog.get_answer_from_google() 
+       
         return speech
    #--------------------------------------------------------------#
 
@@ -80,6 +78,7 @@ class Recognizer(object):
 
         if "éteins" and "ordinateur" in speech or "éteins" and "pc" in speech:
             system("shutdown -h now")
+
 
     #--------------- search through directory ---------------------------------------------------#
 
@@ -188,7 +187,7 @@ def main():
 
     while True:
         Master = Recognizer()
-        speech = Recognizer.record_and_read()
+        speech = Master.record_and_read()
 
         print(speech)
 
