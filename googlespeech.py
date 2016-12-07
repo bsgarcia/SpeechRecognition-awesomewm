@@ -5,12 +5,14 @@ import os
 
 
 class SpeechRecog(object):
+    
 
     @staticmethod
     def get_answer_from_google():
 
         data = open(
                 "/home/random/Python-exp/VoiceCommander/sentence.flac", "rb").read()
+        
         google_speech = http.client.HTTPConnection('www.google.com')
 
         google_speech.request('POST',
@@ -20,8 +22,9 @@ class SpeechRecog(object):
         answer = google_speech.getresponse().read()
         google_speech.close()
         
-        return answer
+        return str(answer, "utf8")
 
 if __name__ == '__main__':
 
     SpeechRecog.get_answer_from_google()
+    quit()
