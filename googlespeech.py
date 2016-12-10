@@ -19,10 +19,10 @@ class SpeechRecog(object):
                               '/speech-api/v2/recognize?output=json&lang=fr&key=AIzaSyC1xLBh8Wsh_DYUU3K3NI9Q2PKX2E4MqLw',
                               data, {'Content-type': 'audio/x-flac; rate=16000'})
 
-        answer = google_speech.getresponse().read()
+        stt = google_speech.getresponse().read()
         google_speech.close()
         
-        return str(answer, "utf8")
+        return str(stt, "utf8")
 
 if __name__ == '__main__':
 

@@ -13,6 +13,7 @@ import numpy as np
 class Recognizer(object):
 
     #--------------------------------------------------------------#
+    icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
 
     def __init__(self):
 
@@ -24,7 +25,6 @@ class Recognizer(object):
             "mpv": ["lecteur", "mpv"]
         }
         self.directory = "/run/media/random/DATA/Animes/"
-        self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
    #--------------------------------------------------------------#
     
     def record_and_read(self):
@@ -44,9 +44,9 @@ class Recognizer(object):
 
                     if not path.isfile("answers/lance_{}.mp3".format(i)):
                         tts = gTTS(
-                            text="Très bien, je lance {}".format(i), lang="fr")
+                            text="Très bien, je lance {}...".format(i), lang="fr")
                         tts.save("answers/lance_{}.mp3".format(i))
-                    notify("Très bien, je lance {}".format(i), self.icon)
+                    notify("Très bien, je lance {}".format(i), icon)
                     Popen(["mpv", "answers/lance_{}.mp3".format(i)])
                     Popen(["{}".format(i), ""])
                     self.end = True
@@ -63,7 +63,7 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Mais de rien mon seigneur, je voue mon existence à votre service", lang="fr")
                 tts.save("answers/merci.mp3")
-            notify("Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
+            notify("Mais de rien mon seigneur, je voue mon existence à votre service", icon)
             Popen(["mpv", "answers/merci.mp3"])
             self.end = True
 
@@ -72,13 +72,30 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Richard Stallmanne est mon seul et unique dieu", lang="fr")
                 tts.save("answers/stallman.mp3")
-            notify("Richard Stallmanne est mon seul et unique dieu", self.icon)
+            notify("Richard Stallmanne est mon seul et unique dieu", icon)
             Popen(["mpv", "answers/stallman.mp3"])
             self.end = True
 
-        # if "éteins" and "ordinateur" in speech or "éteins" and "pc" in speech:
-            # system("shutdown -h now")
-
+  
+        if "suivant" in speech:
+            f_list = open("play", "r").read().split("|")
+            if int(f_list[1]) < 9:
+                file = f_list[0].replace(f_list[1], str(int(f_list[1])+1))
+            else:
+                file = f_list[0].replace(f_list[1], str(int(f_list[1])+1))
+            open("play", "w").write(file+"|"+str(int(f_list[1])+1))
+            self.end = True  
+            Popen(["python", "mpv.py", file])
+        
+        if "précédent" in speech:
+            f_list = open("play", "r").read().split("|")
+            if int(f_list[1]) <= 10:
+                file = f_list[0].replace(f_list[1], str(int(f_list[1])-1))
+            else:
+                file = f_list[0].replace(f_list[1], str(int(f_list[1])-1))
+            open("play", "w").write(file+"|"+str(int(f_list[1])-1))
+            self.end = True
+            Popen(["python", "mpv.py", file])
 
     #--------------- search through directory ---------------------------------------------------#
 
@@ -150,7 +167,8 @@ class Recognizer(object):
                                         
                                         else: 
                                             f = self.directory + file
-                                        print(f)
+                                        
+                                        open("play", "w").write(f+"|"+id)
                                         Popen(
                                             ["python", "mpv.py", f])
                                         self.end = True
@@ -159,7 +177,7 @@ class Recognizer(object):
 
         except:
             pass
-
+    
   #--------------------------------------------------------------#
 
     def killer(self, speech):
@@ -167,7 +185,7 @@ class Recognizer(object):
         for i, j in self.prog.items():
             for k in j:
                 if k in speech:
-                    notify("Très bien, je ferme {}".format(i), self.icon)
+                    notify("Très bien, je ferme {}...".format(i), icon)
                     Popen(["mpv", "answers/ferme_{}.mp3".format(i)])
                     Popen(["killall", "{}".format(i)])
                     self.end = True
@@ -188,13 +206,9 @@ def main():
 
     write_pid_file()
     
-    rd = np.random.choice([0, 1])
-    if rd == 1:
-        Popen(["mpv", "answers/Salut.mp3"])
-    else:
-        Popen(["mpv", "answers/Salut2.mp3"])
-    
-    time.sleep(1.4)
+    system("mpv answers/Salut.mp3")
+    notify("Oui maître ? ", Recognizer.icon )
+
     while True:
         Master = Recognizer()
         speech = Master.record_and_read()
