@@ -206,7 +206,7 @@ def main():
 
     write_pid_file()
     
-    system("mpv answers/Salut.mp3")
+    system("mpv answers/salut.mp3")
     notify("Oui maître ? ", Recognizer.icon )
 
     while True:
@@ -220,7 +220,7 @@ def main():
         else:
             Master.parser(speech)
 
-        if Master.end is True:
+        if Master.end:
             [Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
             quit()
 
