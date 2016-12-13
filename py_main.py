@@ -3,7 +3,6 @@ from notify import notify
 from subprocess import call, Popen
 from recorder import Record
 from gtts import gTTS
-from multiprocessing import Pool
 from googlespeech import SpeechRecog
 import re
 import time
@@ -13,14 +12,15 @@ import numpy as np
 class Recognizer(object):
 
     #--------------------------------------------------------------#
-    icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
 
     def __init__(self):
-
+        
+        
+        self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
         self.end = False
         self.prog = {
             "chromium": ["chrome", "chromium"],
-            "light": ["firefox", "firefoxe", "light"],
+            "firefox": ["firefox", "firefoxe", "light"],
             "gvim": ["vim", "vime", "gvim", "j'ai vim", "j'ai vime", "programmer"],
             "mpv": ["lecteur", "mpv"]
         }
@@ -36,22 +36,33 @@ class Recognizer(object):
         return speech
    #--------------------------------------------------------------#
 
+    def play_answer(self, a, i, *text):
+    
+        if not path.isfile("answers/{}_{}.mp3".format(a, i)):
+            tts = gTTS(
+                        text="Très bien, je {} {}...".format(a, i), lang="fr")
+            tts.save("answers/{}_{}.mp3".format(a,i))
+        notify("Très bien, je {} {} ... ".format(a, i), self.icon)
+        Popen(["mpv", "answers/{}_{}.mp3".format(a, i)])
+        self.end = True
+
+   #--------------------------------------------------------------#
+ 
     def parser(self, speech):
 
         for i, j in self.prog.items():
             for k in j:
                 if k in speech:
-
-                    if not path.isfile("answers/lance_{}.mp3".format(i)):
-                        tts = gTTS(
-                            text="Très bien, je lance {}...".format(i), lang="fr")
-                        tts.save("answers/lance_{}.mp3".format(i))
-                    notify("Très bien, je lance {}".format(i), icon)
-                    Popen(["mpv", "answers/lance_{}.mp3".format(i)])
+                    self.play_answer('lance', i)
                     Popen(["{}".format(i), ""])
-                    self.end = True
                     break
+        
+        self.launch_other_stuff(speech)
 
+    #--------------------------------------------------------------#
+
+    def launch_other_stuff(self, speech):
+        
         if "musique" in speech:
 
             Popen(
@@ -63,7 +74,7 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Mais de rien mon seigneur, je voue mon existence à votre service", lang="fr")
                 tts.save("answers/merci.mp3")
-            notify("Mais de rien mon seigneur, je voue mon existence à votre service", icon)
+            notify("Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
             Popen(["mpv", "answers/merci.mp3"])
             self.end = True
 
@@ -72,7 +83,7 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Richard Stallmanne est mon seul et unique dieu", lang="fr")
                 tts.save("answers/stallman.mp3")
-            notify("Richard Stallmanne est mon seul et unique dieu", icon)
+            notify("Richard Stallmanne est mon seul et unique dieu", self.icon)
             Popen(["mpv", "answers/stallman.mp3"])
             self.end = True
 
@@ -185,11 +196,11 @@ class Recognizer(object):
         for i, j in self.prog.items():
             for k in j:
                 if k in speech:
-                    notify("Très bien, je ferme {}...".format(i), icon)
-                    Popen(["mpv", "answers/ferme_{}.mp3".format(i)])
+                    self.play_answer('ferme', i) 
                     Popen(["killall", "{}".format(i)])
-                    self.end = True
                     break
+
+  #--------------------------------------------------------------#
 
 
 def write_pid_file():
@@ -204,24 +215,22 @@ def write_pid_file():
 
 def main():
 
+    Master = Recognizer()
     write_pid_file()
-    
     system("mpv answers/salut.mp3")
-    notify("Oui maître ? ", Recognizer.icon )
-
+    notify("Oui maître ? ", Master.icon)
+    
     while True:
-        Master = Recognizer()
         speech = Master.record_and_read()
-
         print(speech)
-
+        
         if "ferme" in speech:
             Master.killer(speech)
         else:
             Master.parser(speech)
 
         if Master.end:
-            [Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
+            #[Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
             quit()
 
         else:
