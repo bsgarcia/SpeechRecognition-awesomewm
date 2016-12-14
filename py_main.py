@@ -31,21 +31,20 @@ class Recognizer(object):
 
         r = Record()
         r.launch()
-        speech = SpeechRecog.get_answer_from_google()        
+        speech = SpeechRecog.get_answer_from_google()
+        # understood = re.search("")
         
         return speech
    #--------------------------------------------------------------#
 
-    def play_answer(self, a, i, *text):
+    def play_answer(self, action, software, *text):
     
-        if not path.isfile("answers/{}_{}.mp3".format(a, i)):
+        if not path.isfile("answers/{}_{}.mp3".format(action, software)):
             tts = gTTS(
-                        text="Très bien, je {} {}...".format(a, i), lang="fr")
-            tts.save("answers/{}_{}.mp3".format(a,i))
-        notify("Très bien, je {} {} ... ".format(a, i), self.icon)
-        Popen(["mpv", "answers/{}_{}.mp3".format(a, i)])
-        self.end = True
-
+                        text="Très bien, je {} {}...".format(action, software), lang="fr")
+            tts.save("answers/{}_{}.mp3".format(action, software))
+        notify("Très bien, je {} {} ... ".format(action, software), self.icon)
+        Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
    #--------------------------------------------------------------#
  
     def parser(self, speech):
@@ -55,6 +54,7 @@ class Recognizer(object):
                 if k in speech:
                     self.play_answer('lance', i)
                     Popen(["{}".format(i), ""])
+                    self.end = True
                     break
         
         self.launch_other_stuff(speech)
@@ -91,20 +91,24 @@ class Recognizer(object):
         if "suivant" in speech:
             f_list = open("play", "r").read().split("|")
             if int(f_list[1]) < 9:
-                file = f_list[0].replace(f_list[1], str(int(f_list[1])+1))
+                file = f_list[0].replace(f_list[1], "0"+str(int(f_list[1])+1))
+                open("play", "w").write(file+"|"+"0"+str(int(f_list[1])+1))
             else:
                 file = f_list[0].replace(f_list[1], str(int(f_list[1])+1))
-            open("play", "w").write(file+"|"+str(int(f_list[1])+1))
+                open("play", "w").write(file+"|"+str(int(f_list[1])-1))
+
             self.end = True  
             Popen(["python", "mpv.py", file])
         
         if "précédent" in speech:
             f_list = open("play", "r").read().split("|")
             if int(f_list[1]) <= 10:
-                file = f_list[0].replace(f_list[1], str(int(f_list[1])-1))
+                file = f_list[0].replace(f_list[1], "0"+str(int(f_list[1])-1))
+                open("play", "w").write(file+"|"+"0"+str(int(f_list[1])-1))
             else:
                 file = f_list[0].replace(f_list[1], str(int(f_list[1])-1))
-            open("play", "w").write(file+"|"+str(int(f_list[1])-1))
+                open("play", "w").write(file+"|"+str(int(f_list[1])-1))
+
             self.end = True
             Popen(["python", "mpv.py", file])
 
@@ -228,7 +232,7 @@ def main():
             Master.killer(speech)
         else:
             Master.parser(speech)
-
+             
         if Master.end:
             #[Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
             quit()
