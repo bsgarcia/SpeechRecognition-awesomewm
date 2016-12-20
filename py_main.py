@@ -14,8 +14,7 @@ class Recognizer(object):
     #--------------------------------------------------------------#
 
     def __init__(self):
-        
-        
+
         self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
         self.end = False
         self.prog = {
@@ -26,43 +25,47 @@ class Recognizer(object):
         }
         self.directory = "/run/media/random/DATA/Animes/"
    #--------------------------------------------------------------#
-    
+
     def record_and_read(self):
 
         r = Record()
         r.launch()
         speech = SpeechRecog.get_answer_from_google()
-        # understood = re.search("")
-        
+
         return speech
    #--------------------------------------------------------------#
 
+    def normalize(self, speech):
+
+        speech = speech.replace(
+            "é", "e").replace("É", "E").replace("è", "e")
+        return speech
+
+   #--------------------------------------------------------------#
     def play_answer(self, action, software, *text):
-    
+
         if not path.isfile("answers/{}_{}.mp3".format(action, software)):
             tts = gTTS(
-                        text="Très bien, je {} {}...".format(action, software), lang="fr")
+                text="Très bien, je {} {}...".format(action, software), lang="fr")
             tts.save("answers/{}_{}.mp3".format(action, software))
-        notify("Très bien, je {} {} ... ".format(action, software), self.icon)
+        notify("Très bien, je {} {} ... ".format(
+            action, software), self.icon)
         Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
    #--------------------------------------------------------------#
- 
+
     def parser(self, speech):
-
-        for i, j in self.prog.items():
-            for k in j:
-                if k in speech:
-                    self.play_answer('lance', i)
-                    Popen(["{}".format(i), ""])
-                    self.end = True
-                    break
-        
-        self.launch_other_stuff(speech)
-
+        if "ferme" not in speech:
+            for i, j in self.prog.items():
+                for k in j:
+                    if k in speech:
+                        self.play_answer('lance', i)
+                        Popen(["{}".format(i), ""])
+                        self.end = True
+                        break
     #--------------------------------------------------------------#
 
     def launch_other_stuff(self, speech):
-        
+
         if "musique" in speech:
 
             Popen(
@@ -74,7 +77,8 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Mais de rien mon seigneur, je voue mon existence à votre service", lang="fr")
                 tts.save("answers/merci.mp3")
-            notify("Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
+            notify(
+                "Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
             Popen(["mpv", "answers/merci.mp3"])
             self.end = True
 
@@ -83,71 +87,90 @@ class Recognizer(object):
                 tts = gTTS(
                     text="Richard Stallmanne est mon seul et unique dieu", lang="fr")
                 tts.save("answers/stallman.mp3")
-            notify("Richard Stallmanne est mon seul et unique dieu", self.icon)
+            notify("Richard Stallman est mon seul et unique dieu.", self.icon)
             Popen(["mpv", "answers/stallman.mp3"])
             self.end = True
 
-  
         if "suivant" in speech:
             f_list = open("play", "r").read().split("|")
             if int(f_list[1]) < 9:
-                file = f_list[0].replace(f_list[1], "0"+str(int(f_list[1])+1))
-                open("play", "w").write(file+"|"+"0"+str(int(f_list[1])+1))
+                file = f_list[0].replace(
+                    f_list[1], "0" + str(int(f_list[1]) + 1))
+                open("play", "w").write(
+                    file + "|" + "0" + str(int(f_list[1]) + 1))
             else:
-                file = f_list[0].replace(f_list[1], str(int(f_list[1])+1))
-                open("play", "w").write(file+"|"+str(int(f_list[1])-1))
-
-            self.end = True  
-            Popen(["python", "mpv.py", file])
-        
-        if "précédent" in speech:
-            f_list = open("play", "r").read().split("|")
-            if int(f_list[1]) <= 10:
-                file = f_list[0].replace(f_list[1], "0"+str(int(f_list[1])-1))
-                open("play", "w").write(file+"|"+"0"+str(int(f_list[1])-1))
-            else:
-                file = f_list[0].replace(f_list[1], str(int(f_list[1])-1))
-                open("play", "w").write(file+"|"+str(int(f_list[1])-1))
+                file = f_list[0].replace(
+                    f_list[1], str(int(f_list[1]) + 1))
+                open("play", "w").write(
+                    file + "|" + str(int(f_list[1]) - 1))
 
             self.end = True
             Popen(["python", "mpv.py", file])
 
-    #--------------- search through directory ---------------------------------------------------#
+        if "precedent" in speech:
+            f_list = open("play", "r").read().split("|")
+            if int(f_list[1]) <= 10:
+                file = f_list[0].replace(
+                    f_list[1], "0" + str(int(f_list[1]) - 1))
+                open("play", "w").write(
+                    file + "|" + "0" + str(int(f_list[1]) - 1))
+            else:
+                file = f_list[0].replace(
+                    f_list[1], str(int(f_list[1]) - 1))
+                open("play", "w").write(
+                    file + "|" + str(int(f_list[1]) - 1))
+
+            self.end = True
+            Popen(["python", "mpv.py", file])
+
+        if "bonjour" in speech:
+            if not path.isfile("answer/bonjour.mp3"):
+                tts = gTTS(
+                    text="Bonjour tout le monde, comment ça va ? ", lang="fr")
+                tts.save("answers/bonjour.mp3")
+            notify("Bonjour tout le monde ! ", self.icon)
+            Popen(["mpv", "answers/bonjour.mp3"])
+            self.end = True
+
+    #--------------- search through directory DIRTY VERSION ---------------------------------------------------#
+
+    def play_video(self, speech):
 
         try:
 
             names = re.search("lance \w+ \w+",
-                                  speech)
+                              speech)
             if not names:
                 names = re.search("lancer \w+ \w+",
-                                      speech)
+                                  speech)
                 if not names:
                     names = str(re.search('":"\w+ \w+',
-                        speech).group()).replace('":"', '').split(" ")
+                                          speech).group()).replace('":"', '').split(" ")
                     names.insert(0, "Test")
                 else:
                     names = str(names.group()).split()
-
             else:
                 names = str(names.group()).split()
+
+            id = re.search("episode ([0-9]+)", speech).group(1)
             
-            id = re.search("épisode ([0-9]+)", speech).group(1)
+            if int(id) < 10:
+                id = "0"+str(int(id))
             
             print(type(names))
             print(names)
-            
+
             try:
                 season = re.search("saison ([0-9]+)", speech).group(1)
             except:
                 print("No season!")
-                season = None 
+                season = None
 
             if len(names[1]) <= 3:
-                name = names[2][0:5].replace(
-                    "é", "e").replace("É", "E")
+                name = names[2][0:5]
+
             else:
-                name = names[1][0:5].replace(
-                    "é", "e").replace("É", "E")
+                name = names[1][0:5]
 
             for root, directories, files in walk(self.directory):
                 for directory in directories:
@@ -169,40 +192,40 @@ class Recognizer(object):
                                                     str(directory))
                                             else:
                                                 self.directory += str(
-                                                            directory) + '/'
+                                                    directory) + '/'
                                             break
 
-                            
                             for root, dirs, files in walk(dirs):
                                 for file in files:
                                     if id in str(file) and '.srt' not in str(file):
+
                                         if ' ' in str(file):
                                             f = self.directory + \
                                                 '"{}"'.format(file)
-                                        
-                                        else: 
+                                        else:
                                             f = self.directory + file
-                                        
-                                        open("play", "w").write(f+"|"+id)
+
+                                        open("play", "w").write(
+                                            f + "|" + id)
                                         Popen(
                                             ["python", "mpv.py", f])
                                         self.end = True
-                                            
                                         break
 
         except:
-            pass
-    
+            print("no video")
   #--------------------------------------------------------------#
 
     def killer(self, speech):
 
-        for i, j in self.prog.items():
-            for k in j:
-                if k in speech:
-                    self.play_answer('ferme', i) 
-                    Popen(["killall", "{}".format(i)])
-                    break
+        if "ferme" in speech:
+            for i, j in self.prog.items():
+                for k in j:
+                    if k in speech:
+                        self.play_answer('ferme', i)
+                        Popen(["killall", "{}".format(i)])
+                        self.end = True
+                        break
 
   #--------------------------------------------------------------#
 
@@ -223,18 +246,19 @@ def main():
     write_pid_file()
     system("mpv answers/salut.mp3")
     notify("Oui maître ? ", Master.icon)
-    
+
     while True:
-        speech = Master.record_and_read()
+
+        speech = Master.normalize(Master.record_and_read())
         print(speech)
-        
-        if "ferme" in speech:
-            Master.killer(speech)
-        else:
-            Master.parser(speech)
-             
+
+        Master.killer(speech)
+        Master.parser(speech)
+        Master.launch_other_stuff(speech)
+        Master.play_video(speech)
+
         if Master.end:
-            #[Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
+            [Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
             quit()
 
         else:
