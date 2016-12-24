@@ -37,8 +37,8 @@ class Recognizer(object):
 
     def normalize(self, speech):
 
-        speech = speech.replace(
-            "é", "e").replace("É", "E").replace("è", "e")
+        speech = speech.lower().replace(
+            "é", "e").replace("è", "e")
         return speech
 
    #--------------------------------------------------------------#
@@ -79,7 +79,7 @@ class Recognizer(object):
                 tts.save("answers/merci.mp3")
             notify(
                 "Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
-            Popen(["mpv", "answers/merci.mp3"])
+            Popen(["mpv", "answers/merci_.mp3"])
             self.end = True
 
         if "religion" in speech:
@@ -93,35 +93,63 @@ class Recognizer(object):
 
         if "suivant" in speech:
             f_list = open("play", "r").read().split("|")
-            if int(f_list[1]) < 9:
-                file = f_list[0].replace(
-                    f_list[1], "0" + str(int(f_list[1]) + 1))
-                open("play", "w").write(
-                    file + "|" + "0" + str(int(f_list[1]) + 1))
+            if int(f_list[2]) < 9:
+                id = "0" + str(int(f_list[2]) + 1)
+              
             else:
-                file = f_list[0].replace(
-                    f_list[1], str(int(f_list[1]) + 1))
-                open("play", "w").write(
-                    file + "|" + str(int(f_list[1]) - 1))
+                id = str(int(f_list[2]) + 1)
+            
+            dir = f_list[0]
+            self.directory = f_list[1]
+            
+            for root, dirs, files in walk(dir):
+                for file in files:
+                    if id in str(file) and '.srt' not in str(file):
+                        if ' ' in str(file):
+                            f = self.directory + \
+                                '"{}"'.format(file)
+                        else:
+                            f = self.directory + file
 
-            self.end = True
-            Popen(["python", "mpv.py", file])
+                        open("play", "w").write(
+                            dir + "|"+ self.directory + "|" + id)
+                        Popen(
+                            ["python", "mpv.py", f])
+                        self.end = True
+                        break
+                if self.end:
+                    break
 
+            
         if "precedent" in speech:
             f_list = open("play", "r").read().split("|")
-            if int(f_list[1]) <= 10:
-                file = f_list[0].replace(
-                    f_list[1], "0" + str(int(f_list[1]) - 1))
-                open("play", "w").write(
-                    file + "|" + "0" + str(int(f_list[1]) - 1))
-            else:
-                file = f_list[0].replace(
-                    f_list[1], str(int(f_list[1]) - 1))
-                open("play", "w").write(
-                    file + "|" + str(int(f_list[1]) - 1))
+            if int(f_list[2]) <= 10:
+                id = "0" + str(int(f_list[2]) - 1)
 
-            self.end = True
-            Popen(["python", "mpv.py", file])
+            else:
+                id = str(int(f_list[2]) - 1)
+            
+            dir = f_list[0]
+            self.directory = f_list[1]
+            
+            for root, dirs, files in walk(dir):
+                for file in files:
+                    if id in str(file) and '.srt' not in str(file):
+                        if ' ' in str(file):
+                            f = self.directory + \
+                                '"{}"'.format(file)
+                        else:
+                            f = self.directory + file
+
+                        open("play", "w").write(
+                            dir + "|"+ self.directory + "|" + id)
+                        Popen(
+                            ["python", "mpv.py", f])
+                        self.end = True
+                        break
+                if self.end:
+                    break
+ 
 
         if "bonjour" in speech:
             if not path.isfile("answer/bonjour.mp3"):
@@ -132,7 +160,7 @@ class Recognizer(object):
             Popen(["mpv", "answers/bonjour.mp3"])
             self.end = True
 
-    #--------------- search through directory DIRTY VERSION ---------------------------------------------------#
+    #--------------- search through directory ---------------------------------------------------#
 
     def play_video(self, speech):
 
@@ -174,9 +202,9 @@ class Recognizer(object):
 
             for root, directories, files in walk(self.directory):
                 for directory in directories:
-                    if name.lower() in str(directory).lower():
-                        dirs = self.directory + str(directory) + '/'
-                        for root, directories, files in walk(dirs):
+                    if name in str(directory).lower():
+                        dir = self.directory + str(directory) + '/'
+                        for root, directories, files in walk(dir):
                             if ' ' in directory or '!' in directory:
                                 self.directory += '"{}"/'.format(
                                     str(directory))
@@ -186,7 +214,7 @@ class Recognizer(object):
                                 for directory in directories:
                                     if season:
                                         if season in str(directory):
-                                            dirs += str(directory) + '/'
+                                            dir += str(directory) + '/'
                                             if ' ' in directory or '!' in directory:
                                                 self.directory += '"{}"/'.format(
                                                     str(directory))
@@ -194,23 +222,26 @@ class Recognizer(object):
                                                 self.directory += str(
                                                     directory) + '/'
                                             break
-
-                            for root, dirs, files in walk(dirs):
+                            
+                            for root, dirs, files in walk(dir):
                                 for file in files:
                                     if id in str(file) and '.srt' not in str(file):
-
                                         if ' ' in str(file):
                                             f = self.directory + \
                                                 '"{}"'.format(file)
                                         else:
                                             f = self.directory + file
-
+                                        
                                         open("play", "w").write(
-                                            f + "|" + id)
+                                            dir + "|" + self.directory + "|"+ id)
                                         Popen(
                                             ["python", "mpv.py", f])
                                         self.end = True
                                         break
+                                if self.end:
+                                    break
+                            if self.end:
+                                break
 
         except:
             print("no video")

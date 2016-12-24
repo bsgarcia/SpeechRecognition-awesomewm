@@ -1,25 +1,29 @@
 from snowboy import snowboydecoder
 import os
 
-def write_pid_file():
+class Snowboy(object):
     
-    pid = "\n"+str(os.getpid())
-    f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
-    f.write(pid)
-    f.close()
+    run = 0
+    
+    @staticmethod 
+    def write_pid_file():
+        pid = "\n"+str(os.getpid())
+        f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
+        f.write(pid)
+        f.close()
+    
+    @classmethod
+    def detected_callback(cls):
+        
+        cls.write_pid_file()
+        cls.run += 1 
+        if cls.run >= 2:
+            print "Jarvis > Oui maitre ?"
+            os.system("python py_main.py")
+        
+        detector = snowboydecoder.HotwordDetector(
+                "jarviss.pmdl", sensitivity=0.37, audio_gain=1)
+        detector.start(cls.detected_callback)
 
-def detected_callback():
-    
-    write_pid_file()
-    global launch
-    launch += 1
-    if launch >= 2:
-        print "Jarvis > Oui maitre ?"
-        os.system("python py_main.py")
-    
-    detector = snowboydecoder.HotwordDetector("jarviss.pmdl", sensitivity=0.37, audio_gain=1)
-    detector.start(detected_callback)
-
-launch = 0
-write_pid_file()
-detected_callback()
+Snowboy.write_pid_file()
+Snowboy.detected_callback()
