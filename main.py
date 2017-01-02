@@ -14,7 +14,6 @@ class Snowboy(object):
     
     @classmethod
     def detected_callback(cls):
-        
         cls.write_pid_file()
         cls.run += 1 
         if cls.run >= 2:
@@ -22,7 +21,7 @@ class Snowboy(object):
             os.system("python py_main.py")
         
         detector = snowboydecoder.HotwordDetector(
-                "jarviss.pmdl", sensitivity=0.37, audio_gain=1)
+                "Alexa.pmdl", sensitivity=0.45, audio_gain=1)
         detector.start(cls.detected_callback)
 
 Snowboy.write_pid_file()

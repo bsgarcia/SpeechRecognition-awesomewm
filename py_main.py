@@ -6,7 +6,6 @@ from gtts import gTTS
 from googlespeech import SpeechRecog
 import re
 import time
-import numpy as np
 
 
 class Recognizer(object):
@@ -14,8 +13,11 @@ class Recognizer(object):
     #--------------------------------------------------------------#
 
     def __init__(self):
-
-        self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
+        
+        if "blue" in open("/home/random/.config/awesome/rc.lua", "r").read():
+            self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_blue.png"
+        else:
+            self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
         self.end = False
         self.prog = {
             "chromium": ["chrome", "chromium"],
@@ -39,7 +41,7 @@ class Recognizer(object):
 
         speech = speech.lower().replace(
             "é", "e").replace("è", "e")
-        return speech
+        return speech 
 
    #--------------------------------------------------------------#
     def play_answer(self, action, software, *text):
@@ -275,6 +277,12 @@ def main():
 
     Master = Recognizer()
     write_pid_file()
+    
+    if not path.isfile("answers/salut.mp3"):
+        tts = gTTS(
+                    text="Oui maître ?", lang="fr")
+        tts.save("answers/bonjour.mp3")
+
     system("mpv answers/salut.mp3")
     notify("Oui maître ? ", Master.icon)
 

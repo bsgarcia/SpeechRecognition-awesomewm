@@ -1,0 +1,4 @@
+gtts
+pyaudio
+numpy
+
