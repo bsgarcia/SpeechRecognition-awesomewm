@@ -42,6 +42,15 @@ class Recognizer(object):
         speech = speech.lower().replace(
             "é", "e").replace("è", "e")
         return speech 
+    
+    def print_what_you_said(self, speech):
+
+        # match = re.match(r"^.*\:\"(.*)\"\,.*$", speech).group(1)
+
+        match = speech.split(':"')
+        match = match[1].split('",')
+        match = match[0]
+        notify("You: {}".format(match), self.icon)
 
    #--------------------------------------------------------------#
     def play_answer(self, action, software, *text):
@@ -50,7 +59,7 @@ class Recognizer(object):
             tts = gTTS(
                 text="Très bien, je {} {}...".format(action, software), lang="fr")
             tts.save("answers/{}_{}.mp3".format(action, software))
-        notify("Très bien, je {} {} ... ".format(
+        notify("Alexa: Très bien, je {} {} ... ".format(
             action, software), self.icon)
         Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
    #--------------------------------------------------------------#
@@ -290,7 +299,7 @@ def main():
 
         speech = Master.normalize(Master.record_and_read())
         print(speech)
-
+        Master.print_what_you_said(speech)
         Master.killer(speech)
         Master.parser(speech)
         Master.launch_other_stuff(speech)

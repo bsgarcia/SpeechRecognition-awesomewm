@@ -21,7 +21,7 @@ class Snowboy(object):
             os.system("python py_main.py")
         
         detector = snowboydecoder.HotwordDetector(
-                "Alexa.pmdl", sensitivity=0.45, audio_gain=1)
+                "Alexa.pmdl", sensitivity=0.47, audio_gain=1)
         detector.start(cls.detected_callback)
 
 Snowboy.write_pid_file()
