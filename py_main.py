@@ -18,7 +18,7 @@ class Recognizer(object):
             self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_blue.png"
         else:
             self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
-        self.end = False
+        self.end = False 
         self.prog = {
             "chromium": ["chrome", "chromium"],
             "firefox": ["firefox", "firefoxe", "light"],
@@ -41,6 +41,7 @@ class Recognizer(object):
 
         speech = speech.lower().replace(
             "é", "e").replace("è", "e")
+        
         return speech 
     
     def print_what_you_said(self, speech):
@@ -59,6 +60,7 @@ class Recognizer(object):
             tts = gTTS(
                 text="Très bien, je {} {}...".format(action, software), lang="fr")
             tts.save("answers/{}_{}.mp3".format(action, software))
+        
         notify("Alexa: Très bien, je {} {} ... ".format(
             action, software), self.icon)
         Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
@@ -254,8 +256,9 @@ class Recognizer(object):
                             if self.end:
                                 break
 
-        except:
-            print("no video")
+        except Exception as e:
+            print(e)
+  
   #--------------------------------------------------------------#
 
     def killer(self, speech):
@@ -293,7 +296,7 @@ def main():
         tts.save("answers/bonjour.mp3")
 
     system("mpv answers/salut.mp3")
-    notify("Oui maître ? ", Master.icon)
+    notify("Alexa: Oui maître ? ", Master.icon)
 
     while True:
 
