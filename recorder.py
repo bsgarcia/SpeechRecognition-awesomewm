@@ -11,7 +11,7 @@ import wave
 class Record(object):
 
     def __init__(self):
-        self.THRESHOLD =  700
+        self.THRESHOLD = 1200 
         self.CHUNK_SIZE = 1024
         self.FORMAT = pyaudio.paInt16
         self.RATE = 44100
@@ -100,7 +100,7 @@ class Record(object):
             r.extend(snd_data)
 
             silent = self.is_silent(snd_data)
-
+            print(max(snd_data))
             print("|" * int(max(snd_data) / 33))
             np.append(snd_data, data_array)
             

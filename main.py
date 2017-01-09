@@ -17,11 +17,11 @@ class Snowboy(object):
         cls.write_pid_file()
         cls.run += 1 
         if cls.run >= 2:
-            print "Jarvis > Oui maitre ?"
+            print "Alexa > Oui maitre ?"
             os.system("python py_main.py")
         
         detector = snowboydecoder.HotwordDetector(
-                "Alexa.pmdl", sensitivity=0.47, audio_gain=1)
+                "Alexa.pmdl", sensitivity=0.48, audio_gain=1)
         detector.start(cls.detected_callback)
 
 Snowboy.write_pid_file()

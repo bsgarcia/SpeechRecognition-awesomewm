@@ -5,7 +5,7 @@ from recorder import Record
 from gtts import gTTS
 from googlespeech import SpeechRecog
 import re
-import time
+from time import sleep
 
 
 class Recognizer(object):
@@ -54,24 +54,31 @@ class Recognizer(object):
         notify("You: {}".format(match), self.icon)
 
    #--------------------------------------------------------------#
-    def play_answer(self, action, software, *text):
-
-        if not path.isfile("answers/{}_{}.mp3".format(action, software)):
-            tts = gTTS(
-                text="Très bien, je {} {}...".format(action, software), lang="fr")
-            tts.save("answers/{}_{}.mp3".format(action, software))
+    def play_answer(self, action, software=None, text=None):
+        if software:
+            if not path.isfile("answers/{}_{}.mp3".format(action, software)):
+                tts = gTTS(
+                    text="Très bien, je {} {}...".format(action, software), lang="fr")
+                tts.save("answers/{}_{}.mp3".format(action, software))
         
-        notify("Alexa: Très bien, je {} {} ... ".format(
-            action, software), self.icon)
-        Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
+            notify("Alexa: Très bien, je {} {} ... ".format(
+                                        action, software), self.icon)
+            Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
+        else:
+            if not path.isfile("answers/{}.mp3".format(action)):
+                tts = gTTS(
+                    text=text, lang="fr")
+                tts.save("answers/{}.mp3".format(action))
+            notify("Alexa: {}".format(text), self.icon)
+            Popen(["mpv", "answers/{}.mp3".format(action)])
+            sleep(1)
    #--------------------------------------------------------------#
-
     def parser(self, speech):
-        if "ferme" not in speech:
+        if "ferme" not in speech and "coupe" not in speech:
             for i, j in self.prog.items():
                 for k in j:
                     if k in speech:
-                        self.play_answer('lance', i)
+                        self.play_answer('lance', software=i)
                         Popen(["{}".format(i), ""])
                         self.end = True
                         break
@@ -80,28 +87,18 @@ class Recognizer(object):
     def launch_other_stuff(self, speech):
 
         if "musique" in speech:
-
             Popen(
                 ["mpv", "/run/media/random/DATA2/SoulseekDownloads/complete/Musique_djam"])
             self.end = True
 
         if "merci" in speech:
-            if not path.isfile("answers/merci.mp3"):
-                tts = gTTS(
-                    text="Mais de rien mon seigneur, je voue mon existence à votre service", lang="fr")
-                tts.save("answers/merci.mp3")
-            notify(
-                "Mais de rien mon seigneur, je voue mon existence à votre service", self.icon)
-            Popen(["mpv", "answers/merci_.mp3"])
+            self.play_answer("merci.mp3", 
+                    text="Mais de rien mon seigneur, je voue mon existence à votre service.") 
             self.end = True
 
         if "religion" in speech:
-            if not path.isfile("answers/stallman.mp3"):
-                tts = gTTS(
-                    text="Richard Stallmanne est mon seul et unique dieu", lang="fr")
-                tts.save("answers/stallman.mp3")
-            notify("Richard Stallman est mon seul et unique dieu.", self.icon)
-            Popen(["mpv", "answers/stallman.mp3"])
+            self.play_answer("stallman.mp3", 
+                    text="Richard Stallmanne est mon seul et unique dieu !")
             self.end = True
 
         if "suivant" in speech:
@@ -165,12 +162,8 @@ class Recognizer(object):
  
 
         if "bonjour" in speech:
-            if not path.isfile("answer/bonjour.mp3"):
-                tts = gTTS(
-                    text="Bonjour tout le monde, comment ça va ? ", lang="fr")
-                tts.save("answers/bonjour.mp3")
-            notify("Bonjour tout le monde ! ", self.icon)
-            Popen(["mpv", "answers/bonjour.mp3"])
+            self.play_answer("bonjour.mp3", 
+                    text="Bonjour, comment ça va ?") 
             self.end = True
 
     #--------------- search through directory ---------------------------------------------------#
@@ -263,11 +256,11 @@ class Recognizer(object):
 
     def killer(self, speech):
 
-        if "ferme" in speech:
+        if "ferme" in speech or "coupe" in speech:
             for i, j in self.prog.items():
                 for k in j:
                     if k in speech:
-                        self.play_answer('ferme', i)
+                        self.play_answer('ferme', software=i)
                         Popen(["killall", "{}".format(i)])
                         self.end = True
                         break
@@ -289,14 +282,8 @@ def main():
 
     Master = Recognizer()
     write_pid_file()
-    
-    if not path.isfile("answers/salut.mp3"):
-        tts = gTTS(
-                    text="Oui maître ?", lang="fr")
-        tts.save("answers/bonjour.mp3")
-
-    system("mpv answers/salut.mp3")
-    notify("Alexa: Oui maître ? ", Master.icon)
+   
+    Master.play_answer("salut.mp3", text="Oui maître ?")
 
     while True:
 
@@ -313,14 +300,9 @@ def main():
             quit()
 
         else:
-
-            if not path.isfile("answers/sorry.mp3"):
-                tts = gTTS(
-                    text="Excusez-moi je n'ai pas compris, pouvez-vous répéter ?", lang="fr")
-                tts.save("answer/sorry.mp3")
-
-            system("mpv answers/sorry.mp3")
-
+            Master.play_answer("sorry.mp3", 
+                    text="Excusez-moi je n'ai pas compris, pouvez-vous répéter ?")
+            
 
 if __name__ == '__main__':
 
