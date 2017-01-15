@@ -18,6 +18,7 @@ class Recognizer(object):
             self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_blue.png"
         else:
             self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
+        
         self.end = False 
         self.prog = {
             "chromium": ["chrome", "chromium"],
@@ -43,24 +44,28 @@ class Recognizer(object):
             "é", "e").replace("è", "e")
         
         return speech 
-    
+    #--------------------------------------------------------------#
+   
     def print_what_you_said(self, speech):
 
         # match = re.match(r"^.*\:\"(.*)\"\,.*$", speech).group(1)
-
         match = speech.split(':"')
-        match = match[1].split('",')
-        match = match[0]
-        notify("You: {}".format(match), self.icon)
-
+        
+        if len(match) > 3:
+            match = match[1].split('",')
+            match = match[0]
+            notify("You: {}".format(match), self.icon)
+        else:
+            notify("Error... speech not recorded properly.", self.icon)
    #--------------------------------------------------------------#
+    
     def play_answer(self, action, software=None, text=None):
         if software:
             if not path.isfile("answers/{}_{}.mp3".format(action, software)):
                 tts = gTTS(
                     text="Très bien, je {} {}...".format(action, software), lang="fr")
                 tts.save("answers/{}_{}.mp3".format(action, software))
-        
+            
             notify("Alexa: Très bien, je {} {} ... ".format(
                                         action, software), self.icon)
             Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
@@ -70,9 +75,12 @@ class Recognizer(object):
                     text=text, lang="fr")
                 tts.save("answers/{}.mp3".format(action))
             notify("Alexa: {}".format(text), self.icon)
-            Popen(["mpv", "answers/{}.mp3".format(action)])
-            sleep(1)
+            call(["mpv", "answers/{}.mp3".format(action)])
+        
+        self.end = True
+  
    #--------------------------------------------------------------#
+    
     def parser(self, speech):
         if "ferme" not in speech and "coupe" not in speech:
             for i, j in self.prog.items():
@@ -82,8 +90,21 @@ class Recognizer(object):
                         Popen(["{}".format(i), ""])
                         self.end = True
                         break
-    #--------------------------------------------------------------#
+  
+  #--------------------------------------------------------------#
+    
+    def killer(self, speech):
+        if "ferme" in speech or "coupe" in speech:
+            for i, j in self.prog.items():
+                for k in j:
+                    if k in speech:
+                        self.play_answer('ferme', software=i)
+                        Popen(["killall", "{}".format(i)])
+                        self.end = True
+                        break
 
+  #--------------------------------------------------------------#
+    
     def launch_other_stuff(self, speech):
 
         if "musique" in speech:
@@ -92,14 +113,12 @@ class Recognizer(object):
             self.end = True
 
         if "merci" in speech:
-            self.play_answer("merci.mp3", 
+            self.play_answer("merci", 
                     text="Mais de rien mon seigneur, je voue mon existence à votre service.") 
-            self.end = True
 
         if "religion" in speech:
-            self.play_answer("stallman.mp3", 
-                    text="Richard Stallmanne est mon seul et unique dieu !")
-            self.end = True
+            self.play_answer("stallman", 
+                    text="Richard Stallmann est mon seul et unique dieu !")
 
         if "suivant" in speech:
             f_list = open("play", "r").read().split("|")
@@ -162,7 +181,7 @@ class Recognizer(object):
  
 
         if "bonjour" in speech:
-            self.play_answer("bonjour.mp3", 
+            self.play_answer("bonjour", 
                     text="Bonjour, comment ça va ?") 
             self.end = True
 
@@ -254,36 +273,10 @@ class Recognizer(object):
   
   #--------------------------------------------------------------#
 
-    def killer(self, speech):
-
-        if "ferme" in speech or "coupe" in speech:
-            for i, j in self.prog.items():
-                for k in j:
-                    if k in speech:
-                        self.play_answer('ferme', software=i)
-                        Popen(["killall", "{}".format(i)])
-                        self.end = True
-                        break
-
-  #--------------------------------------------------------------#
-
-
-def write_pid_file():
-
-    pid = "\n" + str(getpid())
-    f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
-    f.write(pid)
-    f.close()
-
-  #--------------------------------------------------------------#
-
-
 def main():
 
     Master = Recognizer()
-    write_pid_file()
-   
-    Master.play_answer("salut.mp3", text="Oui maître ?")
+    Master.play_answer("salut", text="Oui maître ?")
 
     while True:
 
@@ -300,8 +293,8 @@ def main():
             quit()
 
         else:
-            Master.play_answer("sorry.mp3", 
-                    text="Excusez-moi je n'ai pas compris, pouvez-vous répéter ?")
+            Master.play_answer("sorry", 
+                    text="Excusez-moi, pouvez-vous répéter ?")
             
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+from subprocess import call 
 import time
 import numpy as np
 from sys import byteorder
@@ -11,7 +12,7 @@ import wave
 class Record(object):
 
     def __init__(self):
-        self.THRESHOLD = 1200 
+        self.THRESHOLD =  1200
         self.CHUNK_SIZE = 1024
         self.FORMAT = pyaudio.paInt16
         self.RATE = 44100
@@ -82,7 +83,8 @@ class Record(object):
                         frames_per_buffer=self.CHUNK_SIZE)
         num_silent = 0
         snd_started = False
-
+        nb = 0
+        
         r = array('h')
 
         print("               #--------------------------------------------#")
@@ -90,7 +92,7 @@ class Record(object):
         print("\n\n\n                             SOUND LEVEL")
 
         while True:
-
+            nb += 1
             data_array = np.zeros((300))
             # little endian, signed short
             snd_data = array('h', stream.read(self.CHUNK_SIZE))
@@ -98,11 +100,18 @@ class Record(object):
             if byteorder == 'big':
                 snd_data.byteswap()
             r.extend(snd_data)
-
+            
             silent = self.is_silent(snd_data)
-            print(max(snd_data))
+            
+            if nb == 1:
+                self.THRESHOLD = max(snd_data) + max(snd_data)/3
+                t = time.time() 
+            print(self.THRESHOLD, max(snd_data), num_silent) 
             print("|" * int(max(snd_data) / 33))
             np.append(snd_data, data_array)
+            
+            if time.time() - t >= 5.5:
+                break 
             
             if not silent:
                 num_silent = 0
@@ -114,7 +123,7 @@ class Record(object):
             elif not silent and not snd_started:
                 snd_started = True
             
-            if snd_started and num_silent > 75:
+            if snd_started and num_silent > 70:
 
                 break
 
@@ -146,7 +155,7 @@ class Record(object):
     def launch(self):
         self.write_pid_file()
         self.record_to_file('sentence.wav')
-        os.system("sox sentence.wav -r 16000 sentence.flac")
+        call(["sox", "sentence.wav", "-r", "16000","sentence.flac"])
         print("         ----------------------------------------------------- ")
                                                                       
         print("         [+] DONE - result written to sentence.flac [+]     ")
