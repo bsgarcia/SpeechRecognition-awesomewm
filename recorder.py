@@ -19,7 +19,7 @@ class Record(object):
 
     def write_pid_file(self):
         pid = "\n" + str(os.getpid())
-        f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
+        f = open('my_pid', 'a')
         f.write(pid)
         f.close()
 
@@ -104,13 +104,13 @@ class Record(object):
             silent = self.is_silent(snd_data)
             
             if nb == 1:
-                self.THRESHOLD = max(snd_data) + max(snd_data)/3
+                self.THRESHOLD = max(snd_data) + max(snd_data)/2
                 t = time.time() 
             print(self.THRESHOLD, max(snd_data), num_silent) 
             print("|" * int(max(snd_data) / 33))
             np.append(snd_data, data_array)
             
-            if time.time() - t >= 5.5:
+            if time.time() - t >= 4.5:
                 break 
             
             if not silent:

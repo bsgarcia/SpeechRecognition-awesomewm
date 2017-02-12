@@ -1,4 +1,4 @@
-from os import system, path, walk, popen, getpid
+from os import system, path, walk, popen, getenv, getcwd
 from notify import notify
 from subprocess import call, Popen
 from recorder import Record
@@ -6,6 +6,7 @@ from gtts import gTTS
 from googlespeech import SpeechRecog
 import re
 from time import sleep
+from pyowm import OWM
 
 
 class Recognizer(object):
@@ -14,10 +15,8 @@ class Recognizer(object):
 
     def __init__(self):
         
-        if "blue" in open("/home/random/.config/awesome/rc.lua", "r").read():
-            self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_blue.png"
-        else:
-            self.icon = "/home/random/.config/awesome/themes/powerarrow-darker/icons/micon_on.png"
+        if getenv("USER") == 'random':
+            self.get_icon_color()
         
         self.end = False 
         self.prog = {
@@ -28,7 +27,14 @@ class Recognizer(object):
         }
         self.directory = "/run/media/random/DATA/Animes/"
    #--------------------------------------------------------------#
+    def get_icon_color(self):
+        
+        if "blue" in open("/home/random/.config/awesome/rc.lua", "r").read():
+            self.icon = getcwd() + "/awesomewm/icons/micon_blue.png"
+        else:
+            self.icon = getcwd() + "/awesomewm/icons/micon_on.png"
 
+   #--------------------------------------------------------------#
     def record_and_read(self):
 
         r = Record()
@@ -47,8 +53,7 @@ class Recognizer(object):
     #--------------------------------------------------------------#
    
     def print_what_you_said(self, speech):
-
-        # match = re.match(r"^.*\:\"(.*)\"\,.*$", speech).group(1)
+        
         match = speech.split(':"')
         
         if len(match) > 3:
@@ -63,22 +68,21 @@ class Recognizer(object):
         if software:
             if not path.isfile("answers/{}_{}.mp3".format(action, software)):
                 tts = gTTS(
-                    text="Très bien, je {} {}...".format(action, software), lang="fr")
+                text="Très bien, je {} {}...".format(action, software), lang="fr")
                 tts.save("answers/{}_{}.mp3".format(action, software))
             
             notify("Alexa: Très bien, je {} {} ... ".format(
-                                        action, software), self.icon)
-            Popen(["mpv", "answers/{}_{}.mp3".format(action, software)])
+            action, software), self.icon)
+            Popen(["mplayer", "answers/{}_{}.mp3".format(action, software)])
         else:
             if not path.isfile("answers/{}.mp3".format(action)):
-                tts = gTTS(
-                    text=text, lang="fr")
+                tts = gTTS(text=text, lang="fr")
                 tts.save("answers/{}.mp3".format(action))
+            
             notify("Alexa: {}".format(text), self.icon)
-            call(["mpv", "answers/{}.mp3".format(action)])
+            call(["mplayer", "answers/{}.mp3".format(action)])
         
         self.end = True
-  
    #--------------------------------------------------------------#
     
     def parser(self, speech):
@@ -122,9 +126,9 @@ class Recognizer(object):
 
         if "suivant" in speech:
             f_list = open("play", "r").read().split("|")
+            
             if int(f_list[2]) < 9:
                 id = "0" + str(int(f_list[2]) + 1)
-              
             else:
                 id = str(int(f_list[2]) + 1)
             
@@ -135,26 +139,25 @@ class Recognizer(object):
                 for file in files:
                     if id in str(file) and '.srt' not in str(file):
                         if ' ' in str(file):
-                            f = self.directory + \
-                                '"{}"'.format(file)
+                            f = self.directory + '"{}"'.format(file)
                         else:
                             f = self.directory + file
 
                         open("play", "w").write(
                             dir + "|"+ self.directory + "|" + id)
-                        Popen(
-                            ["python", "mpv.py", f])
+                        Popen(["python", "mpv.py", f])
                         self.end = True
                         break
+                
                 if self.end:
                     break
 
             
         if "precedent" in speech:
             f_list = open("play", "r").read().split("|")
+            
             if int(f_list[2]) <= 10:
                 id = "0" + str(int(f_list[2]) - 1)
-
             else:
                 id = str(int(f_list[2]) - 1)
             
@@ -171,7 +174,7 @@ class Recognizer(object):
                             f = self.directory + file
 
                         open("play", "w").write(
-                            dir + "|"+ self.directory + "|" + id)
+                                dir + "|"+ self.directory + "|" + id)
                         Popen(
                             ["python", "mpv.py", f])
                         self.end = True
@@ -190,7 +193,6 @@ class Recognizer(object):
     def play_video(self, speech):
 
         try:
-
             names = re.search("lance \w+ \w+",
                               speech)
             if not names:
@@ -198,7 +200,7 @@ class Recognizer(object):
                                   speech)
                 if not names:
                     names = str(re.search('":"\w+ \w+',
-                                          speech).group()).replace('":"', '').split(" ")
+                    speech).group()).replace('":"', '').split(" ")
                     names.insert(0, "Test")
                 else:
                     names = str(names.group()).split()
@@ -270,6 +272,26 @@ class Recognizer(object):
 
         except Exception as e:
             print(e)
+
+    def weather(self, speech):
+        if ("temps" in speech and "fait" in speech) or "il fait beau" in speech \
+                or "il fait froid" in speech:
+            while True:
+                try:
+                    owm = OWM(API_key='fb55e8ac1711a0b5b3eabae65b32a603', language='fr')
+                    observation = owm.weather_at_place('Bordeaux, fr')
+                    w = observation.get_weather()
+                    self.play_answer("weather", 
+                            text = "Le temps est {} avec une température de {} degrés ...".format(
+                            w._detailed_status, int(w.get_temperature('celsius')['temp_min'])
+                        ))
+                    call(["rm", "answers/weather.mp3"])
+                    self.end = True
+                    break 
+                except Exception as e:
+                    print(e)
+            
+
   
   #--------------------------------------------------------------#
 
@@ -277,6 +299,7 @@ def main():
 
     Master = Recognizer()
     Master.play_answer("salut", text="Oui maître ?")
+    Master.end = False
 
     while True:
 
@@ -287,9 +310,9 @@ def main():
         Master.parser(speech)
         Master.launch_other_stuff(speech)
         Master.play_video(speech)
+        Master.weather(speech)
 
         if Master.end:
-            [Popen(["kill", i]) for i in open("my_pid", "r").readlines()]
             quit()
 
         else:

@@ -1,4 +1,4 @@
-from snowboy import snowboydecoder
+from snowboy import snowboydecoder  
 import os
 
 class Snowboy(object):
@@ -8,7 +8,7 @@ class Snowboy(object):
     @staticmethod 
     def write_pid_file():
         pid = "\n"+str(os.getpid())
-        f = open('/home/random/Python-exp/VoiceCommander/my_pid', 'a')
+        f = open('/home/random/Python/VoiceCommander/my_pid', 'a')
         f.write(pid)
         f.close()
     
