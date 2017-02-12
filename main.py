@@ -16,13 +16,15 @@ class Snowboy(object):
     def detected_callback(cls):
         cls.write_pid_file()
         cls.run += 1 
+        
         if cls.run >= 2:
             print "Alexa > Oui maitre ?"
-            os.system("python py_main.py")
+            os.system("python run.py")
         
         detector = snowboydecoder.HotwordDetector(
-                "Alexa.pmdl", sensitivity=0.48, audio_gain=1)
+                "models/Alexa.pmdl", sensitivity=0.48, audio_gain=1)
         detector.start(cls.detected_callback)
 
-Snowboy.write_pid_file()
-Snowboy.detected_callback()
+if __name__ == '__main__':
+    Snowboy.write_pid_file()
+    Snowboy.detected_callback()

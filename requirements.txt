@@ -1,4 +1,0 @@
-gtts
-pyaudio
-numpy
-

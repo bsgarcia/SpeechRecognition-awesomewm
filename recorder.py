@@ -87,10 +87,6 @@ class Record(object):
         
         r = array('h')
 
-        print("               #--------------------------------------------#")
-
-        print("\n\n\n                             SOUND LEVEL")
-
         while True:
             nb += 1
             data_array = np.zeros((300))
@@ -154,8 +150,8 @@ class Record(object):
 
     def launch(self):
         self.write_pid_file()
-        self.record_to_file('sentence.wav')
-        call(["sox", "sentence.wav", "-r", "16000","sentence.flac"])
+        self.record_to_file('sentences/sentence.wav')
+        call(["sox", "sentences/sentence.wav", "-r", "16000","sentences/sentence.flac"])
         print("         ----------------------------------------------------- ")
                                                                       
         print("         [+] DONE - result written to sentence.flac [+]     ")

@@ -8,7 +8,7 @@ class SpeechRecog(object):
     
     @staticmethod
     def get_answer_from_google():
-        data = open("sentence.flac", "rb").read()
+        data = open("sentences/sentence.flac", "rb").read()
         google_speech = http.client.HTTPConnection('www.google.com')
 
         google_speech.request('POST',
