@@ -6,9 +6,13 @@ GNU/Linux systems are missing personals assistants, therefore I decided to creat
 * Snowboy hotword detection
 
 The program is integrated in my window manager status bar, as a widget. 
+
 ![off](http://i.imgur.com/joESFH2.png)
+
 off mode
-![on](http://i.imgur.com/LzgA9hS.png)
+
+![on](http://i.imgur.com/W6EKsDN.png)
+
 Assistant is listening for the triggering word. 
 
 The code is messy and ugly as hell, but functional.
