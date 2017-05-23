@@ -1,4 +1,4 @@
-#Personal assistant for GNU/Linux
+# Personal assistant for GNU/Linux
 
 GNU/Linux systems are missing personals assistants, therefore I decided to create my own by aggregating 2 technologies: 
 
@@ -23,7 +23,7 @@ Assistant is listening for the triggering word.
 The code is messy and ugly as hell, but functional.
 Some functionalites can be seen in the demo below.  
 
-##Dependencies
+## Dependencies
 * sox
 * gtts
 * Pyaudio
@@ -31,7 +31,7 @@ Some functionalites can be seen in the demo below.
 * mplayer/mpv
 * notify-send
 
-##Demo
+## Demo
 [Demo in french with artefacts and background noise](https://my.mixtape.moe/bwiadi.webm)
 
 
