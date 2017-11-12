@@ -1,3 +1,8 @@
+# Not functional anymore, planning to rewrite
+
+Those scripts are ones of the first I wrote, and actually they constitute my very first personal project. 
+Thus the code is very messy, and I plan to rewrite it soon.
+
 # Personal assistant for GNU/Linux
 
 GNU/Linux systems are missing personals assistants, therefore I decided to create my own by aggregating 2 technologies: 
