@@ -1,7 +1,7 @@
-# Not functional anymore, planning to rewrite
+# Not functional and ugly, planning to rewrite
 
 Those scripts are ones of the first I wrote, and actually they constitute my very first personal project. 
-Thus the code is very messy, and I plan to rewrite it soon.
+Thus the code is very messy, and I plan to rewrite it whenever I find some time.
 
 # Personal assistant for GNU/Linux
 
@@ -25,7 +25,7 @@ Assistant is listening for the triggering word.
 
 
 
-The code is messy and ugly as hell, but functional.
+The code is messy and ugly as hell.
 Some functionalites can be seen in the demo below.  
 
 ## Dependencies
